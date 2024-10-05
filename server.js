@@ -25,9 +25,22 @@ mongoose
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Define allowed origins for CORS
+const allowedOrigins = [
+  'http://localhost:5173', // Local development
+  process.env.CLIENT_BASE_URL // Deployed frontend (Netlify or any other)
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_BASE_URL,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: [
       "Authorization",
@@ -39,23 +52,26 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(cookieParser());
 app.use(express.json());
 
 // auth routes
 app.use("/api/auth", authRouter);
 
+// admin routes
 app.use("/api/admin/products", adminProductRouter);
 app.use("/api/admin/order", adminOrderRouter);
 
+// shop routes
 app.use("/api/shop/products", shopProductRouter);
-app.use("/api/shop/cart", cartRouter);
 app.use("/api/shop/cart", cartRouter);
 app.use("/api/shop/address", addressRouter);
 app.use("/api/shop/order", shopOrderRouter);
 app.use("/api/shop/review", ProductReviewRouter);
 app.use("/api/shop/search", searchRouter);
 
+// common routes
 app.use("/api/common/feature", commonFeatureRouter);
 
 app.listen(PORT, () => console.log(`Server is started on PORT ${PORT}`));
