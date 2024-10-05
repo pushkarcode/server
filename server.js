@@ -17,6 +17,7 @@ const searchRouter = require("./routes/shop/search-routes");
 
 const commonFeatureRouter = require("./routes/common/feature-routes");
 
+// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => console.log("Mongoose is connected"))
@@ -31,6 +32,7 @@ const allowedOrigins = [
   process.env.CLIENT_BASE_URL // Deployed frontend (Netlify or any other)
 ];
 
+// CORS configuration
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -53,9 +55,11 @@ app.use(
   })
 );
 
+// Middlewares
 app.use(cookieParser());
 app.use(express.json());
 
+// Routes
 // auth routes
 app.use("/api/auth", authRouter);
 
@@ -74,4 +78,5 @@ app.use("/api/shop/search", searchRouter);
 // common routes
 app.use("/api/common/feature", commonFeatureRouter);
 
+// Start the server
 app.listen(PORT, () => console.log(`Server is started on PORT ${PORT}`));
